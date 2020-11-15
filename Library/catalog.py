@@ -40,15 +40,18 @@ class Catalog:
         # as we are using icon images (more user friendly) and client has client rows we can use client id here
         data_rows = []
         for row in rows:
-            service_id = row[self._listing_dao.get_column_index('service_id')]
             data_rows.append([
                 row[self._listing_dao.get_column_index('display_title')],
-                self._services_dao.read_service_name(service_id),
+                row[self._listing_dao.get_column_index('service_id')],
                 row[self._listing_dao.get_column_index('named_info')]
             ])
         if data_rows:
-            return pandas.DataFrame(data_rows, columns=Catalog.DATAFRAME_COLUMNS)
+            dataframe = pandas.DataFrame(data_rows, columns=Catalog.DATAFRAME_COLUMNS)
+            return self._group_by_services_in_dataframe(dataframe)
         return None
+
+    def _group_by_services_in_dataframe(self, dataframe):
+        return dataframe.groupby(['title'])['service'].apply(lambda x: ','.join(x)).reset_index()
 
     def scrape_listings_from_source(self, limit=1000, log=None):
         # Get scraping details for each source.
@@ -91,9 +94,10 @@ class Catalog:
         if self.dataframe is not None:
             for row in self.dataframe.values.tolist():
                 display_title = row[self.DATAFRAME_COLUMNS.index('title')]
-                service_id = service_scraping_details.get(row[self.DATAFRAME_COLUMNS.index('service')])
+                service_ids = service_scraping_details.get(row[self.DATAFRAME_COLUMNS.index('service')]).split(',')
                 named_info = row[self.DATAFRAME_COLUMNS.index('named_info')]
-                listing_id = self._listing_dao.write(service_id, display_title, named_info)
+                for service_id in service_ids:
+                    listing_id = self._listing_dao.write(service_id, display_title, named_info)
                 self._titles_dao.write(listing_id, display_title.lower())
             if log:
                 log.info('Saved {} rows to database.'.format(len(self.dataframe)))
@@ -109,8 +113,9 @@ class Catalog:
         if self.dataframe is not None:
             df = self.dataframe
             if service_filter:
-                pattern = '|'.join([self.service_name_mapping.get(s) for s in service_filter])
-                return df.loc[(df['title'].str.lower() == title_string) & (df['service']).str.contains(pattern)]
+                pattern = '|'.join([s for s in service_filter])
+                df = df.loc[(df['title'].str.lower() == title_string) & (df['service']).str.contains(pattern)]
+                return df
             else:
                 return df.loc[df['title'].str.lower() == title_string]
         return None
