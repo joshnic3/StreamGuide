@@ -1,6 +1,7 @@
 import json
 
 from Library.core import Database
+from Library import constants
 
 
 class DAO:
@@ -94,4 +95,18 @@ class ServicesDAO(DAO):
     def read_service_name(self, service_id):
         return self.get_values(service_id, ['name'])[0][0]
 
+
+class RequestsDAO(DAO):
+    TABLE = 'requests'
+    SCHEMA = ['id', 'user_identifier', 'datetime', 'method', 'data']
+
+    def __init__(self, database_file_path):
+        super().__init__(database_file_path)
+
+    def write(self, user_identifier, request_datetime, method, data):
+        request_id = Database.unique_id()
+        values = [request_id, user_identifier, request_datetime.strftime(constants.DATETIME.FORMAT), method,
+                  json.dumps(data)]
+        self._database.insert(self.TABLE, values)
+        return request_id
 

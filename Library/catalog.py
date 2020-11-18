@@ -26,7 +26,7 @@ class Catalog:
         data_rows = []
         named_data_map = Catalog.DATA_MAP.get('named_data')
         for row in raw_data:
-            named_info = {k: row[i] for k, i in named_data_map.items() if i <= len(row) - 1}
+            named_info = {k: row[i] for k, i in named_data_map.items() if i <= len(row) - 1 and not row[i] == 'N/A'}
             data_rows.append([
                 row[Catalog.DATA_MAP.get('display_title')],
                 row[Catalog.DATA_MAP.get('service')],

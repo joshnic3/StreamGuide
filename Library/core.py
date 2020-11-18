@@ -111,6 +111,15 @@ class Database:
         return Database.CONDITION_TEMPLATE.format(condition)
 
     @staticmethod
+    def _clean_string(dirty_string):
+        if dirty_string is None:
+            dirty_string = ''
+        else:
+            dirty_string = str(dirty_string)
+        clean_string = dirty_string.replace('"', "'")
+        return clean_string
+
+    @staticmethod
     def unique_id(salt=None):
         to_hash = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
         to_hash = to_hash + str(salt) if salt is not None else to_hash
@@ -148,19 +157,9 @@ class Database:
         else:
             return self.execute_sql(sql_query=sql)
 
-    def select_inner_join(self, table, join_table, columns, condition, join_condition, distinct=False, return_sql=False):
-        columns_str = self.SEPARATOR_CHAR.join(columns) if columns else Database.ALL_CHAR
-        condition_str = self.CONDITION_TEMPLATE.format(condition) if condition else ''
-        query_template = self.QUERY_TEMPLATES.get('select_distinct_inner_join') if distinct else self.QUERY_TEMPLATES.get('select_inner_join')
-        sql = query_template.format(columns_str, table, join_table, join_condition, condition_str)
-        if return_sql:
-            return sql
-        else:
-            return self.execute_sql(sql_query=sql)
-
     def insert(self, table, values, return_sql=False):
         values = values if isinstance(values, list) else [values]
-        values_str = self.SEPARATOR_CHAR.join(['"{}"'.format(str(v)) for v in values])
+        values_str = self.SEPARATOR_CHAR.join(['"{}"'.format(self._clean_string(v)) for v in values])
         sql = self.QUERY_TEMPLATES.get('insert').format(table, values_str)
         if return_sql:
             return sql

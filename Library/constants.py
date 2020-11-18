@@ -26,3 +26,7 @@ class API:
     WRITE = 1
     DRY = 2
 
+
+class SERVER:
+    GET = 'get'
+    POST = 'post'

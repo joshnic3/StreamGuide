@@ -31,10 +31,14 @@ def build_response(response_dict, stats=None):
     return response
 
 
-@app.route('/listings')
+@app.route('/listings', methods=['GET'])
 def listings():
+    # Process request.
     search_string = request.args.get('search', default='', type=str).lower().replace('+', ' ')
+    # TODO, can and should get this from cookies.
     filter_list = request.args.get('filter', default='', type=str).replace('+', ' ').split(',')
+    api.track_request(request.cookies.get('uid'), constants.SERVER.GET, parameters={'search': search_string, 'filter': filter_list})
+
     suggestions, suggestion_response_time = api.get_suggested_titles(search_string)
     if filter_list:
         results, listing_response_time = api.search_listings(suggestions, filter_list)
@@ -46,7 +50,7 @@ def listings():
     return build_response(None)
 
 
-@app.route('/services')
+@app.route('/services', methods=['GET'])
 def services():
     if api.services_rows:
         return build_response(api.services_rows)

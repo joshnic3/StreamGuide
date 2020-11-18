@@ -6,7 +6,7 @@ import sys
 from Library import constants
 from Library.api import API
 from Library.core import Database, ScriptConfiguration, Logger, parse_arguments
-from Library.data import TitlesDAO, ListingsDAO, ServicesDAO
+from Library.data import TitlesDAO, ListingsDAO, ServicesDAO, RequestsDAO
 
 
 def reset_database(data_path, service_rows, log):
@@ -31,7 +31,7 @@ def reset_database(data_path, service_rows, log):
         pass
 
     # Create tables.
-    daos = [TitlesDAO, ListingsDAO, ServicesDAO]
+    daos = [TitlesDAO, ListingsDAO, ServicesDAO, RequestsDAO]
     for dao in daos:
         dao(current_file_path).create_table()
         log.info('Created table "{}" in database.'.format(dao.TABLE))

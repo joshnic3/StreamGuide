@@ -12,11 +12,12 @@ class Scraper:
         page = requests.get(url)
         soup = BeautifulSoup(page.content, 'html.parser')
         table = soup.find("table", Scraper.TARGET)
-        table_body = table.find('tbody')
-        for row in table_body.find_all('tr'):
-            cols = row.find_all('td')
-            cols = [ele.text.strip() for ele in cols]
-            data.append([ele for ele in cols if ele])
+        if table:
+            table_body = table.find('tbody')
+            for row in table_body.find_all('tr'):
+                cols = row.find_all('td')
+                cols = [ele.text.strip() for ele in cols]
+                data.append([ele for ele in cols if ele])
         return data
 
     @staticmethod

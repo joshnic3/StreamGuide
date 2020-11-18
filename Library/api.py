@@ -6,7 +6,7 @@ import pandas
 
 from Library import constants
 from Library.catalog import Catalog
-from Library.data import TitlesDAO, ServicesDAO
+from Library.data import TitlesDAO, ServicesDAO, RequestsDAO
 
 
 def performance():
@@ -28,6 +28,7 @@ class API:
         self.services_rows = []
         if mode != constants.API.DRY:
             self.catalog = Catalog(self.database_file_path)
+            self.requests_dao = RequestsDAO(self.database_file_path)
             self._pre_load_all_data()
 
     def _pre_load_all_data(self):
@@ -46,6 +47,7 @@ class API:
 
     @performance()
     def get_suggested_titles(self, search_string):
+        # Done in Catalog class
         return sorted(list(set(TitlesDAO(self.database_file_path).read_like_string(search_string))))
 
     @performance()
@@ -66,7 +68,10 @@ class API:
             if self.catalog.dataframe is not None:
                 print('Loaded {} listings.'.format(len(self.catalog.dataframe)))
 
-    # TODO only have to load from db async, scraping will be done by seperate job
-    def async_refresh_listings(self):
-        pool = Pool(processes=1)
-        pool.apply_async(self.refresh_listings)
+    def track_request(self, user_identifier, method, parameters=None, data=None):
+        if method == constants.SERVER.GET and parameters is not None:
+            self.requests_dao.write(user_identifier, datetime.datetime.now(), method, parameters)
+        elif method == constants.SERVER.POST and data is not None:
+            self.requests_dao.write(user_identifier, datetime.datetime.now(), method, data)
+        else:
+            pass
