@@ -42,11 +42,15 @@ class TitlesDAO(DAO):
         self._database.insert(self.TABLE, [title_id, listing_id, title_string])
         return title_id
 
+    def write_multiple(self, rows):
+        rows_with_ids = [[Database.unique_id(), *r] for r in rows]
+        self._database.insert_multiple(self.TABLE, rows_with_ids)
+
     def read_like_string(self, title_string):
         condition = 'title_string like "{}%" OR title_string like "% {}%"'.format(
             title_string.lower(), title_string.lower())
-        title_sting_index = self.get_column_index('title_string')
-        return [r[0] for r in self._database.select(self.TABLE, [self.SCHEMA[title_sting_index]], condition)]
+        listing_id_index = self.get_column_index('listing_id')
+        return [r[0] for r in self._database.select(self.TABLE, [self.SCHEMA[listing_id_index]], condition)]
 
 
 class ListingsDAO(DAO):

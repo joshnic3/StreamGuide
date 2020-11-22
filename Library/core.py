@@ -167,6 +167,7 @@ class Database:
             return self.execute_sql(sql_query=sql)
 
     def insert_multiple(self, table, rows):
+        # TODO Issue here ehen inserting possible search title links
         sql_queries = [self.insert(table, values, return_sql=True) for values in rows]
         self.execute_sql(sql_query_list=sql_queries)
 

@@ -37,23 +37,24 @@ def listings():
     search_string = request.args.get('search', default='', type=str).lower().replace('+', ' ')
     # TODO, can and should get this from cookies.
     filter_list = request.args.get('filter', default='', type=str).replace('+', ' ').split(',')
-    api.track_request(request.cookies.get('uid'), constants.SERVER.GET, parameters={'search': search_string, 'filter': filter_list})
+    api.track_request(request.cookies.get('uid'), constants.SERVER.GET, parameters={'search': search_string})
 
-    suggestions, suggestion_response_time = api.get_suggested_titles(search_string)
+    # Get requested data from API.
     if filter_list:
-        results, listing_response_time = api.search_listings(suggestions, filter_list)
+        results, time_elapsed = api.search_listings(search_string, filter_list)
     else:
-        results, listing_response_time = api.search_listings(suggestions)
+        results, time_elapsed = api.search_listings(search_string)
+
+    # Send response.
     if results is not None:
-        time_elapsed = suggestion_response_time + listing_response_time
-        return build_response(api.dataframe_to_dict(results), stats={'elapsed': time_elapsed, 'count': len(results)})
+        return build_response(results, stats={'elapsed': time_elapsed, 'count': len(results)})
     return build_response(None)
 
 
 @app.route('/services', methods=['GET'])
 def services():
-    if api.services_rows:
-        return build_response(api.services_rows)
+    if api.service_rows:
+        return build_response(api.service_rows)
     return build_response(None)
 
 

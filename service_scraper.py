@@ -45,8 +45,9 @@ def do_work(sc, log):
     api = API(sc.paths.get('data'))
     # TODO should only call API functions.
     # TODO maybe log should be a api member.
-    api.catalog.scrape_listings_from_source(limit=int(sc.params.get('load_limit')), log=log)
-    api.catalog.save_listings_to_database(log=log)
+    # TODO only done like this now because of logging, this can be moved to api when global loging in place.
+    listing_rows = api.catalog.scrape_listings_from_source(limit=int(sc.params.get('load_limit')), log=log)
+    api.catalog.save_listing_rows_to_database(listing_rows, log=log)
     return constants.JOB.FINISHED_SUCCESSFULLY, [], []
 
 

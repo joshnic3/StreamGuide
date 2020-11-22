@@ -5,10 +5,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/Library/api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/catalog.py" beforeDir="false" afterPath="$PROJECT_DIR$/Library/catalog.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/Library/constants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/Library/core.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/Library/data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/scraping.py" beforeDir="false" afterPath="$PROJECT_DIR$/Library/scraping.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/service_scraper.py" beforeDir="false" afterPath="$PROJECT_DIR$/service_scraper.py" afterDir="false" />
     </list>
@@ -17,6 +15,9 @@
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="catalog" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -160,5 +161,16 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Library/api.py</url>
+          <line>60</line>
+          <option name="timeStamp" value="22" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
