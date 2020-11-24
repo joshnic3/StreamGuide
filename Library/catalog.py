@@ -32,13 +32,11 @@ class Catalog:
         raw_data = []
         for service in service_rows:
             # Prepare list of URLs to scrape.
-            if log:
-                log.info('Scraping listings for "{}".'.format(service[service_name_index]))
+            print('Scraping listings for "{}".'.format(service[service_name_index]))
             urls = Scraper.generate_urls(service[scraping_url_index], limit)
             for url in urls:
                 # Scrape listing from URL.
-                if log:
-                    log.info('Scraping URL "{}".'.format(url))
+                print('Scraping URL "{}".'.format(url))
                 service_raw_data = Scraper.scrape_page(url)
 
                 # Append service name to each row.
