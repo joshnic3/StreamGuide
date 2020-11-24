@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import sys
@@ -8,6 +9,7 @@ from flask import Flask, request, Response
 from Library import constants
 from Library.api import API
 from Library.core import parse_arguments, ScriptConfiguration, Logger
+from Library.data import RequestsDAO
 
 app = Flask(__name__)
 api = None
@@ -29,6 +31,18 @@ def build_response(response_dict, stats=None):
     response.headers.add("Access-Control-Allow-Origin", 'http://{}'.format(web_server_ip))
     response.headers.add("Access-Control-Allow-Credentials", "true")
     return response
+
+
+def track_request(user_identifier, method, parameters=None, data=None):
+    if method == constants.SERVER.GET and parameters is not None:
+        request_data = parameters
+    elif method == constants.SERVER.POST and data is not None:
+        request_data = data
+    else:
+        request_data = None
+
+    request_id = RequestsDAO(api.database_file_path).write(user_identifier, datetime.datetime.now(), method, request_data)
+    return request_id
 
 
 @app.route('/listings', methods=['GET'])

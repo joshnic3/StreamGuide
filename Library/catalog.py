@@ -7,20 +7,20 @@ class Catalog:
     LISTING_KEYS = ['id', 'title', 'services', 'named_info']
 
     def __init__(self, database_file_path):
+        # Initiate data access objects.
         self._services_dao = ServicesDAO(database_file_path)
         self._titles_dao = TitlesDAO(database_file_path)
         self._listing_dao = ListingsDAO(database_file_path)
         self._listing_service_mapping = ListingServiceMapping(database_file_path)
 
-        # id: { display_title: '', services: '', named_info: {} }
-        self.listings_dict = {}
-        self.service_name_mapping = self._get_service_name_mapping()
+        # Initiate static data.
+        self.listings_dict = {}  # id: { display_title: '', services: '', named_info: {} }
 
-    def _get_service_name_mapping(self):
-        rows = self._services_dao.read_all()
-        id_index = self._services_dao.get_column_index('id')
-        name_index = self._services_dao.get_column_index('name')
-        return {r[id_index]: r[name_index] for r in rows}
+    def get_service_rows(self):
+        service_rows = []
+        for raw_service_row in self._services_dao.read_all():
+            service_rows.append({ServicesDAO.SCHEMA[i]: r for i, r in enumerate(raw_service_row)})
+        return service_rows
 
     def scrape_listings_from_source(self, limit=1000, log=None):
         # Get scraping details for each source.

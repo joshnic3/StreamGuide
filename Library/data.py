@@ -112,7 +112,7 @@ class ListingServiceMapping(DAO):
 
 class RequestsDAO(DAO):
     TABLE = 'Requests'
-    SCHEMA = ['id', 'user_identifier', 'datetime', 'method', 'data']
+    SCHEMA = ['id', 'user_identifier', 'datetime', 'method', 'data', 'response_time']
 
     def __init__(self, database_file_path):
         super().__init__(database_file_path)
@@ -120,7 +120,9 @@ class RequestsDAO(DAO):
     def write(self, user_identifier, request_datetime, method, data):
         request_id = Database.unique_id()
         values = [request_id, user_identifier, request_datetime.strftime(constants.DATETIME.FORMAT), method,
-                  json.dumps(data)]
+                  json.dumps(data), None]
         self._database.insert(self.TABLE, values)
         return request_id
 
+    def update_response_time(self, request_id, response_time):
+        pass

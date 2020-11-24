@@ -3,7 +3,7 @@ import os
 
 from Library import constants
 from Library.catalog import Catalog
-from Library.data import TitlesDAO, ServicesDAO, RequestsDAO
+from Library.data import TitlesDAO
 
 
 def performance():
@@ -24,14 +24,12 @@ class API:
         self.database_file_path = os.path.join(data_path, 'data.db')
         self.service_rows = []
         self.catalog = Catalog(self.database_file_path)
-        self.requests_dao = RequestsDAO(self.database_file_path)
         if mode != constants.API.SCRAPE:
             self._pre_load_all_data()
 
     def _pre_load_all_data(self):
         # load service rows.
-        for raw_service_row in ServicesDAO(self.database_file_path).read_all():
-            self.service_rows.append({ServicesDAO.SCHEMA[i]: r for i, r in enumerate(raw_service_row)})
+        self.service_rows = self.catalog.get_service_rows()
 
         # Log pre-load listings.
         self.catalog.fetch_listings_from_database()
@@ -54,19 +52,12 @@ class API:
                 listings.append(listing)
 
         # Return listings.
-        if listings:
-            return listings
-        return None
+        return listings if listings else None
 
     def refresh_listings(self, limit=1000):
         if not self.read_only:
             listing_rows = self.catalog.scrape_listings_from_source(limit=limit)
             self.catalog.save_listing_rows_to_database(listing_rows)
 
-    def track_request(self, user_identifier, method, parameters=None, data=None):
-        if method == constants.SERVER.GET and parameters is not None:
-            self.requests_dao.write(user_identifier, datetime.datetime.now(), method, parameters)
-        elif method == constants.SERVER.POST and data is not None:
-            self.requests_dao.write(user_identifier, datetime.datetime.now(), method, data)
-        else:
-            self.requests_dao.write(user_identifier, datetime.datetime.now(), method, None)
+
+
