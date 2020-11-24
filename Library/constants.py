@@ -24,7 +24,7 @@ class ServiceDetails:
 class API:
     READ_ONLY = 0
     WRITE = 1
-    DRY = 2
+    SCRAPE = 2
 
 
 class SERVER:

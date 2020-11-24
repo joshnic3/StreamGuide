@@ -1,8 +1,5 @@
 import datetime
 import os
-from multiprocessing import Pool
-
-import pandas
 
 from Library import constants
 from Library.catalog import Catalog
@@ -26,9 +23,9 @@ class API:
         self.read_only = True if mode == constants.API.READ_ONLY else False
         self.database_file_path = os.path.join(data_path, 'data.db')
         self.service_rows = []
-        if mode != constants.API.DRY:
-            self.catalog = Catalog(self.database_file_path)
-            self.requests_dao = RequestsDAO(self.database_file_path)
+        self.catalog = Catalog(self.database_file_path)
+        self.requests_dao = RequestsDAO(self.database_file_path)
+        if mode != constants.API.SCRAPE:
             self._pre_load_all_data()
 
     def _pre_load_all_data(self):
@@ -50,23 +47,21 @@ class API:
         listing_ids = list(set(TitlesDAO(self.database_file_path).read_like_string(search_string)))
 
         # Search listing dictionary for listing IDs.
-        listings = {}
+        listings = []
         for listing_id in listing_ids:
             listing = self.catalog.get_listings(listing_id, service_filter)
             if listing is not None:
-                listings[listing_id] = listing
+                listings.append(listing)
 
         # Return listings.
         if listings:
             return listings
         return None
 
-    def refresh_listings(self):
+    def refresh_listings(self, limit=1000):
         if not self.read_only:
-            listing_rows = self.catalog.scrape_listings_from_source()
+            listing_rows = self.catalog.scrape_listings_from_source(limit=limit)
             self.catalog.save_listing_rows_to_database(listing_rows)
-            if self.catalog.listings_dict is not None:
-                print('Loaded {} listings.'.format(len(self.catalog.listings_dict)))
 
     def track_request(self, user_identifier, method, parameters=None, data=None):
         if method == constants.SERVER.GET and parameters is not None:

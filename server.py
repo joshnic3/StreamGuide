@@ -35,8 +35,7 @@ def build_response(response_dict, stats=None):
 def listings():
     # Process request.
     search_string = request.args.get('search', default='', type=str).lower().replace('+', ' ')
-    # TODO, can and should get this from cookies.
-    filter_list = request.args.get('filter', default='', type=str).replace('+', ' ').split(',')
+    filter_list = request.cookies.get('service_filter').split(',')
     api.track_request(request.cookies.get('uid'), constants.SERVER.GET, parameters={'search': search_string})
 
     # Get requested data from API.

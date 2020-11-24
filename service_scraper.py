@@ -6,7 +6,7 @@ import sys
 from Library import constants
 from Library.api import API
 from Library.core import Database, ScriptConfiguration, Logger, parse_arguments
-from Library.data import TitlesDAO, ListingsDAO, ServicesDAO, RequestsDAO
+from Library.data import TitlesDAO, ListingsDAO, ServicesDAO, RequestsDAO, ListingServiceMapping
 
 
 def reset_database(data_path, service_rows, log):
@@ -24,17 +24,17 @@ def reset_database(data_path, service_rows, log):
     # Backup database file.
     if os.path.isfile(current_file_path):
         shutil.copy(current_file_path, backup_file_path)
-        log.info('Backed up {} to "{}".'.format(file_name, backup_file_path))
+        log.info('Backed up "{}" to "{}".'.format(file_name, backup_file_path))
 
     # Open new database file.
     with open(current_file_path, 'w'):
         pass
 
     # Create tables.
-    daos = [TitlesDAO, ListingsDAO, ServicesDAO, RequestsDAO]
+    daos = [TitlesDAO, ListingsDAO, ServicesDAO, RequestsDAO, ListingServiceMapping]
     for dao in daos:
         dao(current_file_path).create_table()
-        log.info('Created table "{}" in database.'.format(dao.TABLE))
+        log.info('Created table "{}" in "{}".'.format(dao.TABLE, file_name))
 
     # Add services.
     Database(current_file_path).insert_multiple(ServicesDAO.TABLE, service_rows)
@@ -42,12 +42,8 @@ def reset_database(data_path, service_rows, log):
 
 def do_work(sc, log):
     reset_database(sc.paths.get('data'), sc.params.get('service_rows'), log)
-    api = API(sc.paths.get('data'))
-    # TODO should only call API functions.
-    # TODO maybe log should be a api member.
-    # TODO only done like this now because of logging, this can be moved to api when global loging in place.
-    listing_rows = api.catalog.scrape_listings_from_source(limit=int(sc.params.get('load_limit')), log=log)
-    api.catalog.save_listing_rows_to_database(listing_rows, log=log)
+    api = API(sc.paths.get('data'), mode=constants.API.SCRAPE)
+    api.refresh_listings(limit=int(sc.params.get('load_limit')))
     return constants.JOB.FINISHED_SUCCESSFULLY, [], []
 
 
