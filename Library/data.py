@@ -23,15 +23,9 @@ class DAO:
             return self.SCHEMA.index(column_name)
         return None
 
-    def get_values(self, element_id, columns):
-        condition = 'id="{}"'.format(str(element_id))
-        if all([True for c in columns if c in self.SCHEMA]):
-            return self._database.select(self.TABLE, columns, condition)
-        return None
-
 
 class TitlesDAO(DAO):
-    TABLE = 'titles'
+    TABLE = 'Titles'
     SCHEMA = ['id', 'listing_id', 'title_string']
 
     def __init__(self, database_file_path):
@@ -54,8 +48,8 @@ class TitlesDAO(DAO):
 
 
 class ListingsDAO(DAO):
-    TABLE = 'listings'
-    SCHEMA = ['id', 'service_id', 'display_title', 'named_info']
+    TABLE = 'Listings'
+    SCHEMA = ['id', 'display_title', 'named_info']
 
     def __init__(self, database_file_path):
         super().__init__(database_file_path)
@@ -70,21 +64,22 @@ class ListingsDAO(DAO):
         dict_string = json.dumps(named_info_dict)
         return dict_string.replace('"', "'")
 
-    def write(self, service_id, display_title, named_info_dict):
+    def write(self, display_title, named_info_dict):
         listing_id = Database.unique_id()
-        row = [listing_id, service_id, display_title, self._parse_named_info_to_string(named_info_dict)]
+        row = [listing_id, display_title, self._parse_named_info_to_string(named_info_dict)]
         self._database.insert(self.TABLE, row)
         return listing_id
 
     def read_all(self):
         rows = self._database.select(self.TABLE, columns=self.SCHEMA)
         if rows:
-            return [[*r[:-1], self._parse_named_info_to_dict(r[3])] for r in rows]
-        return None
+            named_info_index = self.get_column_index('named_info')
+            return [[*r[:-1], self._parse_named_info_to_dict(r[named_info_index])] for r in rows]
+        return []
 
 
 class ServicesDAO(DAO):
-    TABLE = 'services'
+    TABLE = 'Services'
     SCHEMA = ['id', 'name', 'scraping_url', 'icon_url']
 
     def __init__(self, database_file_path):
@@ -96,12 +91,27 @@ class ServicesDAO(DAO):
             return result
         return None
 
-    def read_service_name(self, service_id):
-        return self.get_values(service_id, ['name'])[0][0]
+
+class ListingServiceMapping(DAO):
+    TABLE = 'ListingServiceMapping'
+    SCHEMA = ['id', 'listing_id', 'service_id']
+
+    def __init__(self, database_file_path):
+        super().__init__(database_file_path)
+
+    def write(self, listing_id, service_id):
+        mapping_id = Database.unique_id()
+        self._database.insert(self.TABLE, [mapping_id, listing_id, service_id])
+        return mapping_id
+
+    def read(self, listing_id):
+        condition = 'listing_id="{}"'.format(listing_id)
+        rows = self._database.select(self.TABLE, ['service_id'], condition)
+        return [r[0] for r in rows]
 
 
 class RequestsDAO(DAO):
-    TABLE = 'requests'
+    TABLE = 'Requests'
     SCHEMA = ['id', 'user_identifier', 'datetime', 'method', 'data']
 
     def __init__(self, database_file_path):

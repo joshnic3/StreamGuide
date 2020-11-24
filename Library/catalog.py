@@ -1,4 +1,4 @@
-from Library.data import ServicesDAO, TitlesDAO, ListingsDAO
+from Library.data import ServicesDAO, TitlesDAO, ListingsDAO, ListingServiceMapping
 from Library.scraping import Scraper
 
 
@@ -10,7 +10,9 @@ class Catalog:
         self._services_dao = ServicesDAO(database_file_path)
         self._titles_dao = TitlesDAO(database_file_path)
         self._listing_dao = ListingsDAO(database_file_path)
+        self._listing_service_mapping = ListingServiceMapping(database_file_path)
 
+        # id: { display_title: '', services: '', named_info: {} }
         self.listings_dict = {}
         self.service_name_mapping = self._get_service_name_mapping()
 
@@ -45,7 +47,7 @@ class Catalog:
 
                 raw_data.extend(service_raw_data)
 
-        # Load format raw data.
+        # Format raw data.
         if raw_data:
             listing_rows = []
             named_data_map = Catalog.DATA_MAP.get('named_data')
@@ -53,7 +55,7 @@ class Catalog:
                 named_info = {k: row[i] for k, i in named_data_map.items() if i <= len(row) - 1 and not row[i] == 'N/A'}
                 listing_rows.append({
                     'title': row[Catalog.DATA_MAP.get('display_title')],
-                    'services': row[Catalog.DATA_MAP.get('service')],
+                    'service': row[Catalog.DATA_MAP.get('service')],
                     'named_info': named_info
                 })
             return listing_rows
@@ -80,44 +82,49 @@ class Catalog:
         # Get service name mapping.
         service_rows = self._services_dao.read_all()
         service_name_index = self._services_dao.get_column_index('name')
-        service_scraping_details = {r[service_name_index]: r[0] for r in service_rows}
+        service_id_map = {r[service_name_index]: r[0] for r in service_rows}
 
         # Write each row to database.
+        listing_display_titles = {}
         if listing_rows is not None:
             for listing in listing_rows:
-                service_ids = service_scraping_details.get(listing.get('services')).split(',')
+                # Gather data.
                 display_title = listing.get('title')
                 named_info = listing.get('named_info')
-                for service_id in service_ids:
-                    # Write listing.
-                    listing_id = self._listing_dao.write(service_id, display_title, named_info)
+                service_id = service_id_map.get(listing.get('service'))
 
-                    # Link all searchable variations of the display title to the listing.
-                    searchable_title_rows = [[listing_id, t] for t in self.generate_searchable_titles(display_title)]
-                    self._titles_dao.write_multiple(searchable_title_rows)
+                # Add listing if display title has not yet been listed.
+                if display_title in listing_display_titles:
+                    listing_id = listing_display_titles.get(display_title)
+                    # TODO Update existing listing row with any extra named info.
+                else:
+                    listing_id = self._listing_dao.write(display_title, named_info)
+                    listing_display_titles[display_title] = listing_id
+
+                # Add service mapping.
+                self._listing_service_mapping.write(listing_id, service_id)
+
+                # Add searchable titles.
+                title_rows = [[listing_id, t] for t in self.generate_searchable_titles(display_title)]
+                self._titles_dao.write_multiple(title_rows)
+
             if log:
-                log.info('Saved {} rows to database.'.format(len(listing_rows)))
+                log.info('Saved {} listings to database.'.format(len(listing_display_titles)))
 
     def fetch_listings_from_database(self):
-        rows = self._listing_dao.read_all()
-        listings_dict = {}
-        if rows:
-            for row in rows:
-                row_as_dict = dict(zip(self._listing_dao.SCHEMA, row))
-                listings_dict[row_as_dict.get('id')] = {
-                    'title': row_as_dict.get('display_title'),
-                    'services': row_as_dict.get('service_id'),
-                    'named_info': row_as_dict.get('named_info')
-                }
-
-            # TODO Merge listings with the same title and group services.
-            # will need listing service mapping table.
-
-        self.listings_dict = listings_dict
+        self.listings_dict = {}
+        for row in self._listing_dao.read_all():
+            row_as_dict = dict(zip(self._listing_dao.SCHEMA, row))
+            self.listings_dict[row_as_dict.get('id')] = {
+                'title': row_as_dict.get('display_title'),
+                'services': self._listing_service_mapping.read(row_as_dict.get('id')),
+                'named_info': row_as_dict.get('named_info')
+            }
 
     def get_listings(self, listing_id, service_filter=None):
-        if self.listings_dict is not None:
-            listing = self.listings_dict.get(listing_id, None)
-            if listing is not None and listing.get('services') in service_filter:
-                return listing
+        listing = self.listings_dict.get(listing_id, None)
+        if listing is not None:
+            for service_id in listing.get('services'):
+                if service_id in service_filter:
+                    return listing
         return None
