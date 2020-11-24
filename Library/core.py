@@ -89,6 +89,7 @@ class ScriptConfiguration:
             return self._runtime.strftime(constants.DATETIME.FORMAT)
         return self._runtime
 
+
 class Database:
     ALL_CHAR = '*'
     SEPARATOR_CHAR = ','
@@ -96,10 +97,9 @@ class Database:
     QUERY_TEMPLATES = {
         'select': 'SELECT {} FROM {}{};',
         'select_distinct': 'SELECT DISTINCT {} FROM {}{};',
-        'select_inner_join': 'SELECT {} FROM {} INNER JOIN {} ON {}{};',
-        'select_distinct_inner_join': 'SELECT DISTINCT {} FROM {} INNER JOIN {} ON {}{};',
         'insert': 'INSERT INTO {} VALUES ({});',
         'create': 'CREATE TABLE {} ({});',
+        'update': 'UPDATE {} SET {}{};',
         'delete': 'DELETE FROM {}{}'
     }
 
@@ -152,30 +152,25 @@ class Database:
         condition_str = self.CONDITION_TEMPLATE.format(condition) if condition else ''
         query_template = self.QUERY_TEMPLATES.get('select_distinct') if distinct else self.QUERY_TEMPLATES.get('select')
         sql = query_template.format(columns_str, table, condition_str)
-        if return_sql:
-            return sql
-        else:
-            return self.execute_sql(sql_query=sql)
+        return sql if return_sql else self.execute_sql(sql_query=sql)
 
     def insert(self, table, values, return_sql=False):
         values = values if isinstance(values, list) else [values]
         values_str = self.SEPARATOR_CHAR.join(['"{}"'.format(self._clean_string(v)) for v in values])
         sql = self.QUERY_TEMPLATES.get('insert').format(table, values_str)
-        if return_sql:
-            return sql
-        else:
-            return self.execute_sql(sql_query=sql)
+        return sql if return_sql else self.execute_sql(sql_query=sql)
+
+    def update(self, table, values_dict, condition, return_sql=False):
+        condition_str = self.CONDITION_TEMPLATE.format(condition)
+        values_str = ','.join(['{}={}'.format(vm, self._clean_string(values_dict[vm])) for vm in values_dict])
+        sql = self.QUERY_TEMPLATES.get('update').format(table, values_str, condition_str)
+        return sql if return_sql else self.execute_sql(sql_query=sql)
 
     def insert_multiple(self, table, rows):
-        # TODO Issue here ehen inserting possible search title links
         sql_queries = [self.insert(table, values, return_sql=True) for values in rows]
         self.execute_sql(sql_query_list=sql_queries)
 
     def delete(self, table, condition, return_sql=False):
         condition_str = self.CONDITION_TEMPLATE.format(condition)
         sql = self.QUERY_TEMPLATES.get('delete').format(table, condition_str)
-        if return_sql:
-            return sql
-        else:
-            return self.execute_sql(sql_query=sql)
-
+        return sql if return_sql else self.execute_sql(sql_query=sql)

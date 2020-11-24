@@ -3,8 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="35d7ed02-1b7f-420c-a3c5-c892cc1a3524" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/Library/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/catalog.py" beforeDir="false" afterPath="$PROJECT_DIR$/Library/catalog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/Library/core.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/Library/data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
     </list>
@@ -159,5 +158,16 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Library/core.py</url>
+          <line>166</line>
+          <option name="timeStamp" value="37" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

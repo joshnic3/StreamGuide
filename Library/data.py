@@ -125,4 +125,5 @@ class RequestsDAO(DAO):
         return request_id
 
     def update_response_time(self, request_id, response_time):
-        pass
+        condition = 'id="{}"'.format(request_id)
+        self._database.update(self.TABLE, {'response_time': float(response_time)}, condition)

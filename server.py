@@ -45,18 +45,25 @@ def track_request(user_identifier, method, parameters=None, data=None):
     return request_id
 
 
+def add_request_response_time(request_id, response_time):
+    RequestsDAO(api.database_file_path).update_response_time(request_id, response_time)
+
+
 @app.route('/listings', methods=['GET'])
 def listings():
     # Process request.
     search_string = request.args.get('search', default='', type=str).lower().replace('+', ' ')
     filter_list = request.cookies.get('service_filter').split(',')
-    track_request(request.cookies.get('uid'), constants.SERVER.GET, parameters={'search': search_string})
+    request_id = track_request(request.cookies.get('uid'), constants.SERVER.GET, parameters={'search': search_string})
 
     # Get requested data from API.
     if filter_list:
         results, time_elapsed = api.search_listings(search_string, filter_list)
     else:
         results, time_elapsed = api.search_listings(search_string)
+
+    # Add response time to request tracking row.
+    add_request_response_time(request_id, time_elapsed)
 
     # Send response.
     if results is not None:
