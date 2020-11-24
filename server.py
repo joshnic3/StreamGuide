@@ -50,7 +50,7 @@ def listings():
     # Process request.
     search_string = request.args.get('search', default='', type=str).lower().replace('+', ' ')
     filter_list = request.cookies.get('service_filter').split(',')
-    api.track_request(request.cookies.get('uid'), constants.SERVER.GET, parameters={'search': search_string})
+    track_request(request.cookies.get('uid'), constants.SERVER.GET, parameters={'search': search_string})
 
     # Get requested data from API.
     if filter_list:
