@@ -127,3 +127,25 @@ class RequestsDAO(DAO):
     def update_response_time(self, request_id, response_time):
         condition = 'id="{}"'.format(request_id)
         self._database.update(self.TABLE, {'response_time': float(response_time)}, condition)
+
+
+class RecommendationScoresDAO(DAO):
+    TABLE = 'RecommendationScores'
+    SCHEMA = ['id', 'listing_id', 'watch_list', 'click_through']
+
+    def __init__(self, database_file_path):
+        super().__init__(database_file_path)
+
+    def write(self, listing_id):
+        recommendation_score_id = Database.unique_id()
+        self._database.insert(self.TABLE, [recommendation_score_id, listing_id, None, None])
+
+    def update(self, listing_id, watch_list_score=None, click_through_score=None):
+        condition = 'listing_id="{}"'.format(listing_id)
+        values_dict = {}
+        if watch_list_score is not None:
+            values_dict['watch_list'] = watch_list_score
+        if click_through_score is not None:
+            values_dict['watch_list'] = click_through_score
+        if values_dict:
+            self._database.update(self.TABLE, values_dict, condition)

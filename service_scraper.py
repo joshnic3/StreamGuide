@@ -1,27 +1,44 @@
 import datetime
 import os
 import shutil
+import sqlite3
 import sys
 
 from Library import constants
 from Library.api import API
 from Library.core import Database, ScriptConfiguration, Logger, parse_arguments
-from Library.data import TitlesDAO, ListingsDAO, ServicesDAO, RequestsDAO, ListingServiceMapping
+from Library.data import TitlesDAO, ListingsDAO, ServicesDAO, RequestsDAO, ListingServiceMapping, RecommendationScoresDAO
 
 
-def create_new_database_file(file_path):
+def create_new_database_file(file_path, daos):
     # Open new database file.
-    with open(file_path, 'w'):
-        pass
+    if not os.path.isfile(file_path):
+        with open(file_path, 'w+'):
+            pass
 
     # Create tables.
-    daos = [TitlesDAO, ListingsDAO, ServicesDAO, RequestsDAO, ListingServiceMapping]
     for dao in daos:
         dao(file_path).create_table()
         print('Created table "{}" in "{}".'.format(dao.TABLE, file_path))
 
 
-def reset_database(data_path, service_rows):
+def copy_tables(source_file_path, destination_file_path, daos):
+    table_rows = {}
+    source_database = Database(source_file_path)
+    for dao in daos:
+        try:
+            table_rows[dao.TABLE] = source_database.select(dao.TABLE, columns=dao.SCHEMA)[1:]
+        except sqlite3.OperationalError as e:
+            pass
+
+    create_new_database_file(destination_file_path, daos)
+    destination_database = Database(destination_file_path)
+    for table in table_rows:
+        rows = [list(r) for r in table_rows.get(table)]
+        destination_database.insert_multiple(table, rows)
+
+
+def reset_database(data_path):
     # Generate directory paths.
     file_name = 'data.db'
     current_file_path = os.path.join(data_path, file_name)
@@ -34,10 +51,12 @@ def reset_database(data_path, service_rows):
     temp_file_path = os.path.join(data_path, temp_file_name)
 
     # Create new temporary database.
-    create_new_database_file(temp_file_path)
+    daos_to_create = [TitlesDAO, ListingsDAO, ListingServiceMapping]
+    create_new_database_file(temp_file_path, daos_to_create)
 
-    # Add services to new temporary database.
-    Database(temp_file_path).insert_multiple(ServicesDAO.TABLE, service_rows)
+    # Copy over static data.
+    daos_to_copy = [RequestsDAO, RecommendationScoresDAO, ServicesDAO]
+    copy_tables(current_file_path, temp_file_path, daos_to_copy)
 
     # Ensure backup path exists.
     if not os.path.isdir(backup_directory):
