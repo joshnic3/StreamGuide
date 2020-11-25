@@ -1,4 +1,3 @@
-request
 requests
 beautifulsoup4
 pyyaml
