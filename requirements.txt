@@ -1,6 +1,6 @@
+request
+requests
 beautifulsoup4
 pyyaml
-requests
-http
 
 Flask==1.1.1
