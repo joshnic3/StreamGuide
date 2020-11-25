@@ -164,11 +164,13 @@ class DatabaseInitiator:
         if not os.path.isfile(database_file_path):
             with open(database_file_path, 'w+'):
                 pass
+            print('Created database file "{}".'.format(database_file_path))
 
         # Create tables.
         for dao in DatabaseInitiator.DAOS:
             try:
                 dao(database_file_path).create_table()
+                print('Created table "{}" in "{}".'.format(dao.TABLE, database_file_path))
             except sqlite3.OperationalError as e:
                 print('WARNING: Could not create table "{}". SQL Error: "{}"'.format(dao.TABLE, e))
 
@@ -184,8 +186,9 @@ class DatabaseInitiator:
         for dao in daos_to_copy:
             try:
                 table_rows[dao.TABLE] = source_database.select(dao.TABLE, columns=dao.SCHEMA)[1:]
+                print('Copied "{}" data to "{}".'.format(dao.TABLE, destination_file_path))
             except sqlite3.OperationalError as e:
-                pass
+                print('WARNING: Could not copy "{}" data. SQL Error: "{}"'.format(dao.TABLE, e))
 
         destination_database = Database(destination_file_path)
         for table in table_rows:

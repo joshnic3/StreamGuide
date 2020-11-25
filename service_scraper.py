@@ -21,6 +21,7 @@ def reset_database(data_path, service_rows):
     DatabaseInitiator.copy_data(current_file_path, temp_file_path)
     Database(temp_file_path).insert_multiple(ServicesDAO.TABLE, service_rows)
 
+    # TODO should be done before the original is touched.
     # Ensure backup path exists.
     backup_directory = os.path.join(data_path, 'backups')
     if not os.path.isdir(backup_directory):
@@ -33,6 +34,7 @@ def reset_database(data_path, service_rows):
         shutil.copy(current_file_path, backup_file_path)
         print('Backed up "{}" to "{}".'.format(file_name, backup_file_path))
 
+    # TODO should be done after scraping.
     # Switchover temporary file to current.
     os.rename(temp_file_path, current_file_path)
 
