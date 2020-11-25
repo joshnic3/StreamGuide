@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="35d7ed02-1b7f-420c-a3c5-c892cc1a3524" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/service_scraper.py" beforeDir="false" afterPath="$PROJECT_DIR$/service_scraper.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -54,7 +53,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.service_scraper">
+  <component name="RunManager" selected="Python.server">
     <configuration name="scratch_10" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="catalog" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -125,8 +124,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.service_scraper" />
         <item itemvalue="Python.server" />
+        <item itemvalue="Python.service_scraper" />
         <item itemvalue="Python.scratch_10" />
       </list>
     </recent_temporary>
