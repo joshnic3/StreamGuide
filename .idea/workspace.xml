@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="35d7ed02-1b7f-420c-a3c5-c892cc1a3524" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/catalog.py" beforeDir="false" afterPath="$PROJECT_DIR$/Library/catalog.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/Library/data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/service_scraper.py" beforeDir="false" afterPath="$PROJECT_DIR$/service_scraper.py" afterDir="false" />
     </list>
@@ -163,8 +164,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/service_scraper.py</url>
-          <line>64</line>
+          <line>25</line>
           <option name="timeStamp" value="40" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/service_scraper.py</url>
+          <line>20</line>
+          <option name="timeStamp" value="42" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -1,15 +1,19 @@
 import json
+import os
 
 from Library.core import Database
 from Library import constants
+
+import sqlite3
 
 
 class DAO:
     TABLE = None
     SCHEMA = None
 
-    def __init__(self, database_file_path):
+    def __init__(self, database_file_path, volatile=False):
         self._database = Database(database_file_path)
+        self.volatile = volatile
         self.database_file_path = database_file_path
 
     def create_table(self, table=None, schema=None):
@@ -29,7 +33,7 @@ class TitlesDAO(DAO):
     SCHEMA = ['id', 'listing_id', 'title_string']
 
     def __init__(self, database_file_path):
-        super().__init__(database_file_path)
+        super().__init__(database_file_path, volatile=True)
 
     def write(self, listing_id, title_string):
         title_id = Database.unique_id()
@@ -52,7 +56,7 @@ class ListingsDAO(DAO):
     SCHEMA = ['id', 'display_title', 'named_info']
 
     def __init__(self, database_file_path):
-        super().__init__(database_file_path)
+        super().__init__(database_file_path, volatile=True)
 
     @staticmethod
     def _parse_named_info_to_dict(named_info_string):
@@ -92,12 +96,12 @@ class ServicesDAO(DAO):
         return None
 
 
-class ListingServiceMapping(DAO):
+class ListingServiceMappingDAO(DAO):
     TABLE = 'ListingServiceMapping'
     SCHEMA = ['id', 'listing_id', 'service_id']
 
     def __init__(self, database_file_path):
-        super().__init__(database_file_path)
+        super().__init__(database_file_path, volatile=True)
 
     def write(self, listing_id, service_id):
         mapping_id = Database.unique_id()
@@ -149,3 +153,42 @@ class RecommendationScoresDAO(DAO):
             values_dict['watch_list'] = click_through_score
         if values_dict:
             self._database.update(self.TABLE, values_dict, condition)
+
+
+class DatabaseInitiator:
+    DAOS = [TitlesDAO, ListingsDAO, ListingServiceMappingDAO, RequestsDAO, RecommendationScoresDAO, ServicesDAO]
+
+    @staticmethod
+    def create_tables(database_file_path):
+        # Open new database file.
+        if not os.path.isfile(database_file_path):
+            with open(database_file_path, 'w+'):
+                pass
+
+        # Create tables.
+        for dao in DatabaseInitiator.DAOS:
+            try:
+                dao(database_file_path).create_table()
+            except sqlite3.OperationalError as e:
+                print('WARNING: Could not create table "{}". SQL Error: "{}"'.format(dao.TABLE, e))
+
+    @staticmethod
+    def copy_data(source_file_path, destination_file_path, force_all=False):
+        if force_all:
+            daos_to_copy = DatabaseInitiator.DAOS
+        else:
+            daos_to_copy = [dao for dao in DatabaseInitiator.DAOS if not dao(source_file_path).volatile]
+
+        table_rows = {}
+        source_database = Database(source_file_path)
+        for dao in daos_to_copy:
+            try:
+                table_rows[dao.TABLE] = source_database.select(dao.TABLE, columns=dao.SCHEMA)[1:]
+            except sqlite3.OperationalError as e:
+                pass
+
+        destination_database = Database(destination_file_path)
+        for table in table_rows:
+            rows = [list(r) for r in table_rows.get(table)]
+            destination_database.insert_multiple(table, rows)
+

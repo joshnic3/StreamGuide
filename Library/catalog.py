@@ -1,4 +1,4 @@
-from Library.data import ServicesDAO, TitlesDAO, ListingsDAO, ListingServiceMapping
+from Library.data import ServicesDAO, TitlesDAO, ListingsDAO, ListingServiceMappingDAO
 from Library.scraping import Scraper
 
 
@@ -11,7 +11,7 @@ class Catalog:
         self._services_dao = ServicesDAO(database_file_path)
         self._titles_dao = TitlesDAO(database_file_path)
         self._listing_dao = ListingsDAO(database_file_path)
-        self._listing_service_mapping = ListingServiceMapping(database_file_path)
+        self._listing_service_mapping = ListingServiceMappingDAO(database_file_path)
 
         # Initiate static data.
         self.listings_dict = {}  # id: { display_title: '', services: '', named_info: {} }
