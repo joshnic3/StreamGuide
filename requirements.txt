@@ -1,0 +1,5 @@
+beautifulsoup4
+pyyaml
+requests
+
+Flask==1.1.1
