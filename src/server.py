@@ -28,6 +28,7 @@ def build_response(response_dict, stats=None):
     response = Response(json.dumps(to_send), status=status_code, mimetype='application/json')
     response.headers.add("Access-Control-Allow-Origin", 'http://{}'.format(web_server_ip))
     response.headers.add("Access-Control-Allow-Credentials", "true")
+    print(response.headers)
     return response
 
 
@@ -119,5 +120,4 @@ def main():
 
 
 if __name__ == '__main__':
-    print('running')
     sys.exit(main())
