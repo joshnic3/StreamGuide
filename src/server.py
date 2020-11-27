@@ -28,7 +28,6 @@ def build_response(response_dict, stats=None):
     response = Response(json.dumps(to_send), status=status_code, mimetype='application/json')
     response.headers.add("Access-Control-Allow-Origin", 'http://{}'.format(web_server_ip))
     response.headers.add("Access-Control-Allow-Credentials", "true")
-    print(response.headers)
     return response
 
 
@@ -52,6 +51,8 @@ def listings():
     # Process request.
     search_string = request.args.get('search', default='', type=str).lower().replace('+', ' ')
     filter_list = request.cookies.get('service_filter').split(',')
+
+    print(request.headers)
     request_id = track_request(request.cookies.get('uid'), constants.SERVER.GET, parameters={'search': search_string})
 
     # Get requested data from API.
