@@ -28,6 +28,12 @@ def build_response(response_dict, stats=None):
     response = Response(json.dumps(to_send), status=status_code, mimetype='application/json')
     response.headers.add("Access-Control-Allow-Origin", 'http://{}'.format(web_server_ip))
     response.headers.add("Access-Control-Allow-Credentials", "true")
+    response.headers.add("Access-Control-Allow-Headers: Content-Type, *")
+
+    # header("Access-Control-Allow-Origin: http://origin.domain:port");
+    # header("Access-Control-Allow-Credentials: true");
+    # header("Access-Control-Allow-Methods: GET, POST");
+    # header("Access-Control-Allow-Headers: Content-Type, *");
     return response
 
 
